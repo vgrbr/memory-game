@@ -1,25 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import Board from "./Board";
+import Score from "./Score";
+import Table from "./Table";
+import { initialState, gameReducer, resetGame, flipCard, tick } from "./state";
 
 function App() {
+  const [game, dispatch] = React.useReducer(gameReducer, initialState);
+  const restartGame = React.useCallback(() => {
+    dispatch(resetGame());
+  }, []);
+  const clickCard = React.useCallback(
+    index => () => {
+      dispatch(flipCard({ index }));
+    },
+    []
+  );
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(tick());
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [game.opened]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Table>
+      <Board flipCard={clickCard} board={game} />
+      <Score
+        matches={game.matches.length}
+        total={game.cards.length}
+        moves={game.moves}
+        restartGame={restartGame}
+      />
+    </Table>
   );
 }
 
